@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bhagavad Gita AI Guide</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: #f3f6fa;
+      font-family: 'Inter', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 600px;
+      margin: 20px auto;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      height: calc(100vh - 40px);
+    }
+    
+    .chat-header {
+      padding: 25px;
+      background: rgba(255, 255, 255, 0.1);
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .chat-header h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .chat-header p {
+      opacity: 0.8;
+      font-size: 0.9rem;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .message {
+      max-width: 80%;
+      padding: 16px 20px;
+      border-radius: 18px;
+      font-size: 1rem;
+      line-height: 1.6;
+      word-break: break-word;
+      position: relative;
+      animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .message.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-bottom-right-radius: 6px;
+    }
+    
+    .message.bot {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border-bottom-left-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .verse-reference {
+      font-weight: 600;
+      color: #ffd700;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .verse-text {
+      font-style: italic;
+      margin-bottom: 12px;
+      display: block;
+    }
+    
+    .explanation-label {
+      font-weight: 600;
+      color: #87ceeb;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .chat-input-area {
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .chat-input {
+      flex: 1;
+      padding: 15px 20px;
+      border-radius: 25px;
+      border: none;
+      font-size: 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      outline: none;
+      margin-right: 15px;
+      transition: all 0.3s ease;
+    }
+    
+    .chat-input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .chat-input:focus {
+      background: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+    
+    .send-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .send-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .send-btn:active {
+      transform: scale(0.95);
+    }
+    
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+        <h1>🌺 Bhagavad Gita AI</h1>
+        <p>Sacred wisdom for every moment</p>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+      <!-- Messages will appear here -->
+    </div>
+
+    <form class="chat-input-area" id="chat-form" autocomplete="off">
+      <input type="text" class="chat-input" id="chat-input" placeholder="Ask for wisdom from the Bhagavad Gita..." required />
+      <button type="submit" class="send-btn">➤</button>
+    </form>
+  </div>
+
+  <script>
+    // Authentic Bhagavad Gita verses for intelligent responses
+    const authenticVerses = [
+      {
+        "c": 2,
+        "v": 47,
+        "t": "You have the right to perform your prescribed duties, but you are not entitled to the fruits of your actions. Never consider yourself the cause of the results of your activities, nor be attached to inaction.",
+        "keywords": ["duty", "work", "action", "results", "detachment", "karma", "effort", "success", "failure"]
+      },
+      {
+        "c": 4,
+        "v": 7,
+        "t": "Whenever there is a decline in righteousness and an increase in unrighteousness, O Arjuna, at that time I manifest Myself on earth.",
+        "keywords": ["righteousness", "dharma", "decline", "evil", "manifestation", "divine", "protection", "justice"]
+      },
+      {
+        "c": 18,
+        "v": 66,
+        "t": "Abandon all varieties of religion and just surrender unto Me. I shall deliver you from all sinful reactions. Do not fear.",
+        "keywords": ["surrender", "religion", "sin", "fear", "deliverance", "faith", "trust", "salvation"]
+      },
+      {
+        "c": 2,
+        "v": 14,
+        "t": "The nonpermanent appearance of happiness and distress, and their disappearance in due course, are like the appearance and disappearance of winter and summer seasons.",
+        "keywords": ["happiness", "sadness", "temporary", "change", "seasons", "impermanence", "emotions", "balance"]
+      },
+      {
+        "c": 2,
+        "v": 20,
+        "t": "For the soul there is neither birth nor death at any time. He has not come into being, does not come into being, and will not come into being. He is unborn, eternal, ever-existing and primeval. He is not slain when the body is slain.",
+        "keywords": ["soul", "eternal", "immortal", "death", "birth", "spirit", "consciousness", "life"]
+      },
+      {
+        "c": 3,
+        "v": 35,
+        "t": "It is better to engage in one's own occupation, even though one may perform it imperfectly, than to accept another's occupation and perform it perfectly.",
+        "keywords": ["occupation", "duty", "imperfect", "perfect", "own", "others", "responsibility", "authenticity"]
+      },
+      {
+        "c": 6,
+        "v": 5,
+        "t": "One must elevate oneself by one's own mind, not degrade oneself. The mind is the friend of the conditioned soul, and his enemy as well.",
+        "keywords": ["mind", "elevation", "degradation", "friend", "enemy", "self-improvement", "consciousness", "control"]
+      },
+      {
+        "c": 9,
+        "v": 22,
+        "t": "But those who always worship Me with exclusive devotion, meditating on My transcendental form—to them I carry what they lack, and I preserve what they have.",
+        "keywords": ["devotion", "worship", "meditation", "divine", "protection", "faith", "dedication", "grace"]
+      },
+      {
+        "c": 12,
+        "v": 13,
+        "t": "One who is not envious but is a kind friend to all living entities, who does not think himself a proprietor and is free from false ego, who is equal in both happiness and distress, who is tolerant, always satisfied, self-controlled, and engaged in devotional service with determination, his mind and intelligence fixed on Me—such a devotee of Mine is very dear to Me.",
+        "keywords": ["kindness", "friendship", "humility", "ego", "equality", "tolerance", "satisfaction", "self-control", "devotion"]
+      },
+      {
+        "c": 14,
+        "v": 27,
+        "t": "I am the basis of the impersonal Brahman, which is the constitutional position of ultimate happiness, and it is immortal, imperishable and eternal.",
+        "keywords": ["happiness", "eternal", "immortal", "divine", "basis", "foundation", "ultimate", "bliss"]
+      }
+    ];
+
+    // Load authentic verses instantly
+    let gitaVerses = authenticVerses;
+    console.log('Loaded', gitaVerses.length, 'authentic Bhagavad Gita verses - INSTANT!');
+
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+
+    // Typewriter effect for bot messages
+    async function typewriterMessage(text, sender) {
+      const msg = document.createElement('div');
+      msg.className = 'message ' + sender;
+      chatMessages.appendChild(msg);
+      
+      let i = 0;
+      function typeNext() {
+        if (i < text.length) {
+          msg.innerHTML = text.slice(0, i);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+          i++;
+          setTimeout(typeNext, 15 + Math.random() * 20);
+        }
+      }
+      typeNext();
+    }
+
+    function appendMessage(text, sender) {
+      if (sender === 'bot') {
+        typewriterMessage(text, sender);
+      } else {
+        const msg = document.createElement('div');
+        msg.className = 'message ' + sender;
+        msg.innerHTML = text;
+        chatMessages.appendChild(msg);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    }
+
+    // Get a random authentic verse
+    function getRandomVerse() {
+      return gitaVerses[Math.floor(Math.random() * gitaVerses.length)];
+    }
+
+    // Find verse by chapter and verse
+    function findVerse(chapter, verse) {
+      return gitaVerses.find(v => 
+        (v.chapter === parseInt(chapter) && v.verse === parseInt(verse)) ||
+        (v.c === parseInt(chapter) && v.v === parseInt(verse))
+      );
+    }
+
+    // Generate intelligent response with stored verses
+    function generateIntelligentResponse(userQuestion) {
+      const question = userQuestion.toLowerCase();
+      
+      // Smart keyword matching for different life situations
+      if (question.includes('sad') || question.includes('depressed') || question.includes('unhappy')) {
+        return {
+          verse: authenticVerses.find(v => v.c === 2 && v.v === 14),
+          explanation: "Remember that happiness and sadness are temporary, like seasons. The Bhagavad Gita teaches us to remain balanced in both joy and sorrow, knowing that change is the only constant in life."
+        };
+      }
+      
+      if (question.includes('work') || question.includes('job') || question.includes('duty') || question.includes('career')) {
+        return {
+          verse: authenticVerses.find(v => v.c === 2 && v.v === 47),
+          explanation: "Focus on doing your work with dedication and sincerity, without being attached to the results. Your worth comes from your effort and commitment, not from success or failure."
+        };
+      }
+      
+      if (question.includes('fear') || question.includes('afraid') || question.includes('scared') || question.includes('anxiety')) {
+        return {
+          verse: authenticVerses.find(v => v.c === 18 && v.v === 66),
+          explanation: "The Bhagavad Gita teaches us to surrender our fears and trust in divine guidance. When we let go of worry and have faith, we find the strength to overcome any challenge."
+        };
+      }
+      
+      if (question.includes('mind') || question.includes('control') || question.includes('thoughts') || question.includes('meditation')) {
+        return {
+          verse: authenticVerses.find(v => v.c === 6 && v.v === 5),
+          explanation: "Your mind can be your greatest friend or enemy. Learn to control your thoughts through meditation and self-discipline. The mind is like a wild horse that needs gentle but firm guidance."
+        };
+      }
+      
+      if (question.includes('soul') || question.includes('spirit') || question.includes('eternal') || question.includes('death')) {
+        return {
+          verse: authenticVerses.find(v => v.c === 2 && v.v === 20),
+          explanation: "The soul is eternal and indestructible. Death only affects the body, not your true self. Understanding this brings peace and removes fear of mortality."
+        };
+      }
+      
+      if (question.includes('happiness') || question.includes('joy') || question.includes('bliss') || question.includes('peace')) {
+        return {
+          verse: authenticVerses.find(v => v.c === 14 && v.v === 27),
+          explanation: "True happiness comes from within, not from external circumstances. The Bhagavad Gita teaches that lasting joy is found in spiritual connection and inner peace."
+        };
+      }
+      
+      if (question.includes('devotion') || question.includes('faith') || question.includes('worship') || question.includes('spiritual')) {
+        return {
+          verse: authenticVerses.find(v => v.c === 9 && v.v === 22),
+          explanation: "Devotion and faith create a direct connection with the divine. When you surrender with love and trust, you receive protection and guidance in all aspects of life."
+        };
+      }
+      
+      if (question.includes('kindness') || question.includes('friendship') || question.includes('humility')) {
+        return {
+          verse: authenticVerses.find(v => v.c === 12 && v.v === 13),
+          explanation: "The qualities of kindness, friendship, and humility make us dear to the divine. These virtues create harmony in relationships and bring inner peace."
+        };
+      }
+      
+      if (question.includes('occupation') || question.includes('responsibility') || question.includes('authentic')) {
+        return {
+          verse: authenticVerses.find(v => v.c === 3 && v.v === 35),
+          explanation: "It's better to do your own work imperfectly than to do someone else's work perfectly. Authenticity and personal responsibility lead to true fulfillment."
+        }
+      }
+      
+      // Default response for any other question
+      const randomVerse = getRandomVerse();
+      return {
+        verse: randomVerse,
+        explanation: "The Bhagavad Gita offers wisdom for every situation in life. This verse reminds us that spiritual knowledge is the key to understanding our purpose and finding inner peace."
+      };
+    }
+
+    // Main chat handler
+    async function sendToAI(userMsg) {
+      appendMessage(userMsg, 'user');
+      appendMessage('<span style="opacity:0.7;">🌿 Finding wisdom...</span>', 'bot');
+      chatInput.value = '';
+      chatInput.focus();
+
+      try {
+        // Check if user asked for specific chapter/verse
+        let match = userMsg.match(/chapter\s*(\d+)[,\s]+verse\s*(\d+)/i);
+        let verse;
+        
+        if (match) {
+          verse = findVerse(match[1], match[2]);
+          if (!verse) {
+            const lastBotMsg = chatMessages.querySelector('.message.bot:last-child');
+            if (lastBotMsg && lastBotMsg.innerHTML.includes('🌿 Finding wisdom...')) {
+              lastBotMsg.remove();
+            }
+            appendMessage('That specific verse is not in my current collection. Let me share another beautiful verse with you.', 'bot');
+            verse = getRandomVerse();
+          }
+        } else {
+          // Generate intelligent response with relevant verse
+          const lastBotMsg = chatMessages.querySelector('.message.bot:last-child');
+          if (lastBotMsg && lastBotMsg.innerHTML.includes('🌿 Finding wisdom...')) {
+            lastBotMsg.remove();
+          }
+          
+          const response = generateIntelligentResponse(userMsg);
+          
+          // Display the verse and explanation
+          let displayText = `<span class="verse-reference">🌺 Bhagavad Gita ${response.verse.c}:${response.verse.v}</span>`;
+          displayText += `<span class="verse-text">"${response.verse.t}"</span>`;
+          displayText += `<span class="explanation-label">💡 Wisdom:</span>${response.explanation}`;
+          
+          appendMessage(displayText, 'bot');
+          return;
+        }
+
+        // Handle specific verse display
+        if (verse) {
+          const lastBotMsg = chatMessages.querySelector('.message.bot:last-child');
+          if (lastBotMsg && lastBotMsg.innerHTML.includes('🌿 Finding wisdom...')) {
+            lastBotMsg.remove();
+          }
+          
+          // Display the verse with explanation
+          let displayText = `<span class="verse-reference">🌺 Bhagavad Gita ${verse.c}:${verse.v}</span>`;
+          displayText += `<span class="verse-text">"${verse.t}"</span>`;
+          
+          // Generate relevant explanation based on verse content
+          let explanation = "";
+          if (verse.c === 2 && verse.v === 47) {
+            explanation = "This famous verse teaches us about Karma Yoga - performing our duties without attachment to results. Focus on the action, not the outcome.";
+          } else if (verse.c === 4 && verse.v === 7) {
+            explanation = "This verse assures us that divine intervention occurs when righteousness declines. God manifests to restore balance and protect dharma.";
+          } else if (verse.c === 18 && verse.v === 66) {
+            explanation = "The ultimate teaching of surrender - abandon all other methods and simply surrender to the divine with faith and trust.";
+          } else {
+            explanation = "This verse contains profound wisdom from the Bhagavad Gita that guides us toward spiritual growth and inner peace.";
+          }
+          
+          displayText += `<span class="explanation-label">💡 Wisdom:</span>${explanation}`;
+          appendMessage(displayText, 'bot');
+        }
+        
+      } catch (e) {
+        const lastBotMsg = chatMessages.querySelector('.message.bot:last-child');
+        if (lastBotMsg && lastBotMsg.innerHTML.includes('🌿 Finding wisdom...')) {
+          lastBotMsg.remove();
+        }
+        
+        console.error('Error:', e);
+        // Fallback to random verse
+        const verse = getRandomVerse();
+        appendMessage(`🌺 Bhagavad Gita ${verse.c}:${verse.v} - "${verse.t}"`, 'bot');
+      }
+    }
+
+    // Event listeners
+    chatForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const userMsg = chatInput.value.trim();
+      if (!userMsg) return;
+      sendToAI(userMsg);
+    });
+
+    chatInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        chatForm.dispatchEvent(new Event('submit'));
+      }
+    });
+
+    // Welcome message
+    setTimeout(() => {
+      appendMessage('Namaste! 🙏 I am your Bhagavad Gita AI guide. Ask me for wisdom, or simply send a message to receive a sacred verse with explanation.', 'bot');
+    }, 500);
+  </script>
+</body>
+</html>
